@@ -38,49 +38,51 @@ bool wavegenOpen()
     return bOK;
 }
 
-void configureDC(char *channel, double offset, int dutyCycle) 
+void configureDC(char *channel, int16_t offset) 
 {
     int isChannelA = strcasecmp(channel, "A") == 0;
     int modeShift = isChannelA ? 0 : 3;
-    double dcShift = isChannelA ? 0 : 16;
+    int valueShift = isChannelA ? 0 : 16;
 
     // clear previous settings
-    *(base + OFS_DTYCYC) &= ~(0xFFFF << dcShift);
     *(base + OFS_MODE) &= ~(0x7 << modeShift);
+    *(base + OFS_OFFSET) &= ~(0xFFFF << valueShift);
 
     // set new configuration
-    *(base + OFS_MODE) |= (mode << modeShift);
-    *(base + OFS_DTYCYC) |= (dc << dcShift);
+    *(base + OFS_MODE) |= (MODE_DC << modeShift);
+    *(base + OFS_OFFSET) |= (offset << valueShift);
 }
 
-void configureWaveform(char *channel, int mode, double frequency, double amplitude, double offset, int dutyCycle) 
+void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, uint16_t phase_offs) 
 {
     int isChannelA = strcasecmp(channel, "a") == 0;
-    double baseFreq = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
+    int OFS_FREQ = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
     int modeShift = isChannelA ? 0 : 3;
-    double valueShift = isChannelA ? 0 : 16;
+    int valueShift = isChannelA ? 0 : 16;
 
     // clear previous settings
-    *(base + baseFreq) = 0;
-    *(base + OFS_AMPLITUDE) &= ~(0xFFFF << valueShift);
-    *(base + OFS_OFFSET) &= ~(0xFFFF << valueShift);
-    *(base + OFS_DTYCYC) &= ~(0xFFFF << valueShift);
     *(base + OFS_MODE) &= ~(0x7 << modeShift);
+    *(base + OFS_FREQ) = 0;
+    *(base + OFS_OFFSET) &= ~(0xFFFF << valueShift);
+    *(base + OFS_AMPLITUDE) &= ~(0xFFFF << valueShift);
+    *(base + OFS_DTYCYC) &= ~(0xFFFF << valueShift);
+    *(base + OFS_PHASE_OFFS) &= ~(0xFFFF << valueShift);
 
     // set new configuration
-    *(base + baseFreq) = frequency;
-    *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
-    *(base + OFS_OFFSET) |= (offset << valueShift);
-    *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
     *(base + OFS_MODE) |= (mode << modeShift);
+    *(base + OFS_FREQ) = frequency;
+    *(base + OFS_OFFSET) |= (offset << valueShift);
+    *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
+    *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
+    *(base + OFS_PHASE_OFFS) |= (phase_offs << valueShift);
 }
 
 void configureRun() 
 {
-    *(base + OFS_RUN) |= 1;
+    *(base + OFS_RUN) = RUN_A | RUN_B;
 }
 
 void configureStop() 
 {
-    *(base + OFS_RUN) &= ~1;
+    *(base + OFS_RUN) = ~(RUN_A | RUN_B);
 }

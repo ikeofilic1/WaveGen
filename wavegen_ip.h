@@ -24,8 +24,8 @@
 #ifndef WAVEGEN_IP_H
 #define WAVEGEN_IP_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 // Define the maximum length of the arbitrary waveform
 #define MAX_ARBITRARY_WAVEFORM_LENGTH 1000
@@ -34,21 +34,16 @@
 // Subroutines
 //-----------------------------------------------------------------------------
 
-#define OFS_MODE         0
-#define OFS_RUN          4
-#define OFS_FREQ_A       8
-#define OFS_FREQ_B      12
-#define OFS_OFFSET      16
-#define OFS_AMPLITUDE   20
-#define OFS_DTYCYC      24
-
-#define OFS_CYCLES      28
-
-#define SPAN_IN_BYTES 32
+#define MODE_DC         0
+#define MODE_SINE       1
+#define MODE_SAWTOOTH   2
+#define MODE_TRIANGLE   3
+#define MODE_SQUARE     4
+#define MODE_ARB        5
 
 bool wavegenOpen();
-void configureDC(char *channel, double offset, int dutyCycle);
-void configureWaveform(char *channel, int mode, double frequency, double amplitude, double offset, int dutyCycle);
+void configureDC(char *channel, int16_t offset);
+void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, uint16_t phase_offs);
 void configureRun();
 void configureStop();
 
