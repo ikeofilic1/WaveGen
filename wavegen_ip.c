@@ -4,8 +4,8 @@
 #include <sys/mman.h>        // mmap
 #include <unistd.h>          // close
 #include "../address_map.h"  // address map
-#include "gpio_ip.h"         // gpio
-#include "gpio_regs.h"       // registers
+#include "wavegen_ip.h"         // gpio
+#include "wavegen_regs.h"       // registers
 
 //-----------------------------------------------------------------------------
 // Global variables
