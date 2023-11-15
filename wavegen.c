@@ -27,7 +27,7 @@
 
 int main(int argc, char* argv[])
 {
-    gpioOpen();
+    wavegenOpen();
     char channel = argv[2];
 
     if (argc == 2)
@@ -40,23 +40,18 @@ int main(int argc, char* argv[])
         {
             configureStop();
         }
-        else if ((strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0))
-        {
-            printf("Command not understood or incorrect number of arguments.\n");
-        }
     }
 
-    if (argc == 4)
+    if (argc >= 3)
     {
-        //wavegen dutyCycle OUT OFS
-        if (strcmp(argv[1], "dutyCycle") == 0)
+        //wavegen DC OUT OFS
+        if (strcmp(argv[1], "DC") == 0)
         {
-            double voltage = atof(argv[3]);
+            double offset = atof(argv[3]);
             configureDC();
         }
 
-        //wavegen cycles OUT N
-        else if (strcmp(argv[1], "cycles") == 0)
+        if (strcmp(argv[1], "cycles") == 0)
         {
             if (argc == 3 && strcmp(argv[2], "continuous") == 0)
             {
@@ -68,39 +63,37 @@ int main(int argc, char* argv[])
                 configureDC();
             }
         }
-    }
 
-    if (argc >= 6)
-    {
         // wavegen sine OUT, FREQ, AMP, [OFS]
         if (strcmp(argv[1], "sine") == 0)
         {
-            mode = 1;
-            frequency = atof(argv[3]);
-            amplitude = atof(argv[4]);
+            int mode = 1;
+            double frequency = atof(argv[3]);
+            double amplitude = atof(argv[4]);
             if (argc == 6) 
             {
-                offset = atof(argv[5]);
+                double offset = atof(argv[5]);
             } 
             else 
             {
-                offset = 0;
+                double offset = 0.0;
             }
             configureWaveform(channel, mode, frequency, amplitude, offset, dutyCycle)
         }
+
         // wavegen sawtooth OUT, FREQ, AMP, [OFS]
         else if (strcmp(argv[1], "sawtooth") == 0)
         {
-            mode = 2;
-            frequency = atof(argv[3]);
-            amplitude = atof(argv[4]);
+            int mode = 2;
+            double frequency = atof(argv[3]);
+            double amplitude = atof(argv[4]);
             if (argc == 6) 
             {
-                offset = atof(argv[5]);
+                double offset = atof(argv[5]);
             } 
             else 
             {
-                offset = 0;
+                double offset = 0.0;
             }
             configureWaveform(channel, mode, frequency, amplitude, offset, dutyCycle)
         }
@@ -108,16 +101,16 @@ int main(int argc, char* argv[])
         // wavegen triangle OUT, FREQ, AMP, [OFS]
         else if (strcmp(argv[1], "triangle") == 0)
         {
-            mode = 3;
-            frequency = atof(argv[3]);
-            amplitude = atof(argv[4]);
+            int mode = 3;
+            double frequency = atof(argv[3]);
+            double amplitude = atof(argv[4]);
             if (argc == 6) 
             {
-                offset = atof(argv[5]);
+                double offset = atof(argv[5]);
             } 
             else 
             {
-                offset = 0;
+                double offset = 0;
             }
             configureWaveform(channel, mode, frequency, amplitude, offset, dutyCycle)
         }
@@ -125,43 +118,42 @@ int main(int argc, char* argv[])
         //wavegen square OUT, FREQ, AMP, [OFS, [DC]]
         else if (strcmp(argv[1], "square") == 0)
         {
-            mode = 4;
-            frequency = atof(argv[3]);
-            amplitude = atof(argv[4]);
+            int mode = 4;
+            double frequency = atof(argv[3]);
+            double amplitude = atof(argv[4]);
 
             if (argc >= 6) 
             {
-                offset = atof(argv[5]);
+                double offset = atof(argv[5]);
             } 
             else 
             {
-                offset = 0.0;
+                double offset = 0.0;
             }
-
-            // Set DC
             if (argc >= 7) 
             {
-                dutyCycle = atof(argv[6]);
+                double dutyCycle = atof(argv[6]);
             } 
             else 
             {
-                dutyCycle = 50.0;
+                double dutyCycle = 50.0;
             }
 
-            // Ensure duty cycle is within valid range (0-100%)
             if (dutyCycle < 0.0) 
             {
-                dutyCycle = 0.0;
+                double dutyCycle = 0.0;
             } 
             else if (dutyCycle > 100.0) 
             {
-                dutyCycle = 100.0;
+                double dutyCycle = 100.0;
             }
             configureWaveform(channel, mode, frequency, amplitude, offset, dutyCycle)
         }
+        wavegenClose();
     }
     return EXIT_SUCCESS;
 }
+
 
 
 

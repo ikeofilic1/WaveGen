@@ -38,29 +38,49 @@ bool wavegenOpen()
     return bOK;
 }
 
-void configureWaveform(char *channel, int mode, int frequency, int amplitude, int offset, int dutyCycle) 
+void configureDC(char *channel, double offset, int dutyCycle) 
+{
+    int isChannelA = strcasecmp(channel, "A") == 0;
+    int modeShift = isChannelA ? 0 : 3;
+    double dcShift = isChannelA ? 0 : 16;
+
+    // clear previous settings
+    *(base + OFS_DTYCYC) &= ~(0xFFFF << dcShift);
+    *(base + OFS_MODE) &= ~(0x7 << modeShift);
+
+    // set new configuration
+    *(base + OFS_MODE) |= (mode << modeShift);
+    *(base + OFS_DTYCYC) |= (dc << dcShift);
+}
+
+void configureWaveform(char *channel, int mode, double frequency, double amplitude, double offset, int dutyCycle) 
 {
     int isChannelA = strcasecmp(channel, "a") == 0;
-    int baseOffset = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
+    double baseFreq = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
     int modeShift = isChannelA ? 0 : 3;
-    int valueShift = isChannelA ? 0 : 16;
+    double valueShift = isChannelA ? 0 : 16;
 
-    // Clear previous settings
-    for (int i = 0; i < (isChannelA ? 16 : 32); i++) {
-        *(base + baseOffset) = 0;
-        *(base + OFS_AMPLITUDE) &= ~(1 << i);
-        *(base + OFS_OFFSET) &= ~(1 << i);
-        *(base + OFS_DTYCYC) &= ~(1 << i);
-    }
+    // clear previous settings
+    *(base + baseFreq) = 0;
+    *(base + OFS_AMPLITUDE) &= ~(0xFFFF << valueShift);
+    *(base + OFS_OFFSET) &= ~(0xFFFF << valueShift);
+    *(base + OFS_DTYCYC) &= ~(0xFFFF << valueShift);
+    *(base + OFS_MODE) &= ~(0x7 << modeShift);
 
-    for (int i = 0; i < 3; i++) {
-        *(base + OFS_MODE) &= ~(1 << i);
-    }
-
-    // Set new configuration
-    *(base + baseOffset) = frequency;
+    // set new configuration
+    *(base + baseFreq) = frequency;
     *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
     *(base + OFS_OFFSET) |= (offset << valueShift);
     *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
     *(base + OFS_MODE) |= (mode << modeShift);
+}
+
+void configureRun() 
+{
+    *(base + OFS_RUN) |= 1;
+}
+
+void configureStop() 
+{
+    *(base + OFS_RUN) &= ~1;
 }
