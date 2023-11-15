@@ -45,7 +45,28 @@ module WaveGen(
     input IMU_DRDY_M,        // IMU data ready (mag)
     input IMU_INT1_AG,       // IMU interrupt (accel/gyro)
     input IMU_INT_M,         // IMU interrupt (mag)
-    output IMU_DEN_AG        // IMU data enable (accel/gyro)
+    output IMU_DEN_AG,        // IMU data enable (accel/gyro)
+    inout [14:0]DDR_addr,
+    inout [2:0]DDR_ba,
+    inout DDR_cas_n,
+    inout DDR_ck_n,
+    inout DDR_ck_p,
+    inout DDR_cke,
+    inout DDR_cs_n,
+    inout [3:0]DDR_dm,
+    inout [31:0]DDR_dq,
+    inout [3:0]DDR_dqs_n,
+    inout [3:0]DDR_dqs_p,
+    inout DDR_odt,
+    inout DDR_ras_n,
+    inout DDR_reset_n,
+    inout DDR_we_n,
+    inout FIXED_IO_ddr_vrn,
+    inout FIXED_IO_ddr_vrp,
+    inout [53:0]FIXED_IO_mio,
+    inout FIXED_IO_ps_clk,
+    inout FIXED_IO_ps_porb,
+    inout FIXED_IO_ps_srstb
 );
     // Terminate all of the unused outputs or i/o's
     // assign LED = 10'b0000000000;
@@ -70,27 +91,48 @@ module WaveGen(
     // For B:
     // 2.5V = 146 in dac words
     // 0V = 2073
+    
+    wire signed [15:0] OUT_A, OUT_B;
 
     wire [11:0] DACA_out, DACB_out;
     assign LED = DACA_out[9:0];
     assign RGB0 = {1'b0, DACA_out[10], 1'b0};
     assign RGB1 = {1'b0, DACA_out[11], 1'b0};
     
-    reg signed [15:0] input_val;    
-    always_comb
-    case (SW[1:0])
-        2'b10: input_val = -25000;
-        2'b11: input_val = -25000;
-        2'b00: input_val = 0;
-        2'b01: input_val = 25000;        
-    endcase
-    
      wire SDI, CS, LDAC, SCK;
      assign GPIO = {4'b0, LDAC, SDI, SCK, CS, 16'b0};
     
     // Instantiate DACs
-    voltsToDACWords #(.DAC_TWOPOINTFIVE(157), .DAC_ZERO(2077)) DACA(input_val, DACA_out);
-    voltsToDACWords #(.DAC_TWOPOINTFIVE(146), .DAC_ZERO(2073)) DACB(input_val, DACB_out);
+    voltsToDACWords #(.DAC_TWOPOINTFIVE(157), .DAC_ZERO(2077)) DACA(OUT_A, DACA_out);
+    voltsToDACWords #(.DAC_TWOPOINTFIVE(146), .DAC_ZERO(2073)) DACB(OUT_B, DACB_out);
     
-    DAC_Controller(DACA_out, DACB_out, CLK100, CS, SCK, SDI, LDAC);    
+    DAC_Controller controller(DACA_out, DACB_out, CLK100, CS, SCK, SDI, LDAC);  
+    
+    system_wrapper system_wrapper_i
+    (
+        .DDR_addr(DDR_addr),
+        .DDR_ba(DDR_ba),
+        .DDR_cas_n(DDR_cas_n),
+        .DDR_ck_n(DDR_ck_n),
+        .DDR_ck_p(DDR_ck_p),
+        .DDR_cke(DDR_cke),
+        .DDR_cs_n(DDR_cs_n),
+        .DDR_dm(DDR_dm),
+        .DDR_dq(DDR_dq),
+        .DDR_dqs_n(DDR_dqs_n),
+        .DDR_dqs_p(DDR_dqs_p),
+        .DDR_odt(DDR_odt),
+        .DDR_ras_n(DDR_ras_n),
+        .DDR_reset_n(DDR_reset_n),
+        .DDR_we_n(DDR_we_n),
+        .EN_0(LDAC == 1'b0),
+        .FIXED_IO_ddr_vrn(FIXED_IO_ddr_vrn),
+        .FIXED_IO_ddr_vrp(FIXED_IO_ddr_vrp),
+        .FIXED_IO_mio(FIXED_IO_mio),
+        .FIXED_IO_ps_clk(FIXED_IO_ps_clk),
+        .FIXED_IO_ps_porb(FIXED_IO_ps_porb),
+        .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb),
+        .OUT_A_0(OUT_A),
+        .OUT_B_0(OUT_B)
+    );
 endmodule
