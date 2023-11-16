@@ -3,6 +3,7 @@
 #include <fcntl.h>           // open
 #include <sys/mman.h>        // mmap
 #include <unistd.h>          // close
+#include <strings.h>
 #include "../address_map.h"  // address map
 #include "wavegen_ip.h"         // gpio
 #include "wavegen_regs.h"       // registers
@@ -40,7 +41,7 @@ bool wavegenOpen()
 
 void configureDC(char *channel, int16_t offset) 
 {
-    int isChannelA = strcasecmp(channel, "A") == 0;
+    int isChannelA = strcasecmp(channel, "a") == 0;
     int modeShift = isChannelA ? 0 : 3;
     int valueShift = isChannelA ? 0 : 16;
 
@@ -75,6 +76,16 @@ void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amp
     *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
     *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
     *(base + OFS_PHASE_OFFS) |= (phase_offs << valueShift);
+}
+
+void setCycles(char *channel, uint16_t cycles) 
+{
+    int isChannelA = strcasecmp(channel, "a") == 0;
+    int valueShift = isChannelA ? 0 : 16;
+
+    *(base + OFS_PHASE_OFFS) &= ~(0xFFFF << valueShift);
+
+    *(base + OFS_PHASE_OFFS) |= (cycles << valueShift);
 }
 
 void configureRun() 

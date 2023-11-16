@@ -46,5 +46,6 @@ void configureDC(char *channel, int16_t offset);
 void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, uint16_t phase_offs);
 void configureRun();
 void configureStop();
+void setCycles(char *channel, uint16_t cycles);
 
 #endif // WAVEGEN_IP_H
