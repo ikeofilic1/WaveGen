@@ -62,32 +62,33 @@ int main(int argc, char* argv[])
             setCycles(channel, cycles);
         }
     }
-    else if (argc == 5) {
+    // wavegen {sine|sawtooth|square|triangle} OUT FREQ AMP [OFFS] [DTCYC] [PHASE_OFFS]
+    else if (argc == 5 || argc == 6 || argc == 7 || argc == 8) {
 
         uint8_t mode; // 0, 1, 2, 3, 4, or 5
         uint32_t frequency = atoi(argv[3]); // 0 to 500000000 (units of 100uHz)
         uint16_t amplitude = atoi(argv[4]); // -25000 to 25000
         int16_t offset = argc > 5 ? atoi(argv[5]) : 0; // -25000 to 25000
         uint16_t dutyCycle = argc > 6 ? atoi(argv[6]) : 32768; // 0 to 65535
-        int16_t phaseOffs = argc > 6 ? atoi(argv[6]) : 0; // -18000 to 18000
+        int16_t phaseOffs = argc > 7 ? atoi(argv[7]) : 0; // -18000 to 18000
 
-        // wavegen sine OUT, FREQ, AMP, [OFS]
+        // wavegen sine OUT, FREQ, AMP, [OFS] [PHASEOFFS]
         if (strcmp(argv[1], "sine") == 0)
         {
             mode = MODE_SINE;                        
         }
-        // wavegen sawtooth OUT, FREQ, AMP, [OFS]
+        // wavegen sawtooth OUT, FREQ, AMP, [OFS], [PHASEOFFS]
         else if (strcmp(argv[1], "sawtooth") == 0)
         {
             mode = MODE_SAWTOOTH;
         }
-        // wavegen triangle OUT, FREQ, AMP, [OFS]
+        // wavegen triangle OUT, FREQ, AMP, [OFS], [PHASEOFFS]
         else if (strcmp(argv[1], "triangle") == 0)
         {
             mode = MODE_TRIANGLE;
         }
 
-        //wavegen square OUT, FREQ, AMP, [OFS, [DC]]
+        //wavegen square OUT, FREQ, AMP, [OFS, [DC]], [PHASEOFFS]
         else if (strcmp(argv[1], "square") == 0)
         {
             mode = MODE_SQUARE;

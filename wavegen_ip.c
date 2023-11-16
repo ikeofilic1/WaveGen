@@ -1,4 +1,5 @@
 #include <stdint.h>          // C99 integer types -- uint32_t
+#include <stdio.h>
 #include <stdbool.h>         // bool
 #include <fcntl.h>           // open
 #include <sys/mman.h>        // mmap
@@ -52,6 +53,8 @@ void configureDC(char *channel, int16_t offset)
     // set new configuration
     *(base + OFS_MODE) |= (MODE_DC << modeShift);
     *(base + OFS_OFFSET) |= (offset << valueShift);
+
+    printf("Setting channel %s as DC %.2fV\n", isChannelA ? "A" : "B", (float)offset/10000);
 }
 
 void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, uint16_t phase_offs) 
@@ -76,6 +79,11 @@ void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amp
     *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
     *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
     *(base + OFS_PHASE_OFFS) |= (phase_offs << valueShift);
+
+    printf("Modeshift = %d\n", modeShift);
+    printf("valueShift = %d\n", valueShift);
+    printf("Setting output %s as mode %d, with frequency %d, amplitude %d, offset %d, duty cycle %d, and phase offset %d\n",
+        isChannelA ? "A" : "B", mode, frequency, amplitude, offset, dutyCycle, phase_offs);
 }
 
 void setCycles(char *channel, uint16_t cycles) 
@@ -83,9 +91,9 @@ void setCycles(char *channel, uint16_t cycles)
     int isChannelA = strcasecmp(channel, "a") == 0;
     int valueShift = isChannelA ? 0 : 16;
 
-    *(base + OFS_PHASE_OFFS) &= ~(0xFFFF << valueShift);
+    *(base + OFS_CYCLES) &= ~(0xFFFF << valueShift);
 
-    *(base + OFS_PHASE_OFFS) |= (cycles << valueShift);
+    *(base + OFS_CYCLES) |= (cycles << valueShift);
 }
 
 void configureRun() 

@@ -28,13 +28,13 @@
 #define OFS_CYCLES      28
 #define OFS_PHASE_OFFS  32
 
-#define MODE_MASK
-#define RUN_MASK          4
-#define OFFSET_MASK      16
-#define AMPLITUDE_MASK   20
-#define DTYCYC_MASK      24
-#define CYCLES_MASK      28
-#define PHASE_OFFS_MASK  32
+// #define MODE_MASK        
+// #define RUN_MASK          4
+// #define OFFSET_MASK      16
+// #define AMPLITUDE_MASK   20
+// #define DTYCYC_MASK      24
+// #define CYCLES_MASK      28
+// #define PHASE_OFFS_MASK  32
 
 #define RUN_A  (0x1 << 0)
 #define RUN_B  (0x1 << 1)
