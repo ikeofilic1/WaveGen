@@ -52,12 +52,12 @@ void configureDC(char *channel, int16_t offset)
 
     // set new configuration
     *(base + OFS_MODE) |= (MODE_DC << modeShift);
-    *(base + OFS_OFFSET) |= (offset << valueShift);
+    *(base + OFS_OFFSET) |= ((uint16_t)offset << valueShift);
 
     printf("Setting channel %s as DC %.2fV\n", isChannelA ? "A" : "B", (float)offset/10000);
 }
 
-void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, uint16_t phase_offs) 
+void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, int16_t phase_offs) 
 {
     int isChannelA = strcasecmp(channel, "a") == 0;
     int OFS_FREQ = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
@@ -75,15 +75,37 @@ void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amp
     // set new configuration
     *(base + OFS_MODE) |= (mode << modeShift);
     *(base + OFS_FREQ) = frequency;
-    *(base + OFS_OFFSET) |= (offset << valueShift);
+    *(base + OFS_OFFSET) |= ((uint16_t)offset << valueShift);
     *(base + OFS_AMPLITUDE) |= (amplitude << valueShift);
     *(base + OFS_DTYCYC) |= (dutyCycle << valueShift);
-    *(base + OFS_PHASE_OFFS) |= (phase_offs << valueShift);
+    *(base + OFS_PHASE_OFFS) |= ((uint16_t)phase_offs << valueShift);
 
-    printf("Modeshift = %d\n", modeShift);
-    printf("valueShift = %d\n", valueShift);
-    printf("Setting output %s as mode %d, with frequency %d, amplitude %d, offset %d, duty cycle %d, and phase offset %d\n",
-        isChannelA ? "A" : "B", mode, frequency, amplitude, offset, dutyCycle, phase_offs);
+    char *wave;
+    switch (mode) 
+    {
+        case MODE_SINE:     wave = "sine"; break;
+        case MODE_SAWTOOTH: wave = "sawtooth"; break;
+        case MODE_TRIANGLE: wave = "triangle"; break;
+        case MODE_SQUARE:   wave = "square"; break; 
+        case MODE_ARB:      wave = "arbitrary"; break;
+        default:            wave = "error";
+    }
+
+    bool kHz = frequency >= 1000; 
+
+    if (mode == MODE_SQUARE)
+        printf("Setting channel %s as a %'.3f%s square wave, with amplitude %'.2fV, offset %'.2fV, %'.2f%% duty cycle, and %'.2f degrees out of phase\n",
+            isChannelA ? "A" : "B", 
+            kHz ? frequency*1.0/1000 : frequency*1.0, 
+            kHz ? "kHz" : "Hz", amplitude*1.0/10000, 
+            offset*1.0/10000, dutyCycle*100.0/(1<<16), phase_offs*1.0/100);
+    else 
+        printf("Setting channel %s as a %'.3f%s %s wave, with amplitude %'.2fV, offset %'.2fV, and %'.2f degrees out of phase\n",
+            isChannelA ? "A" : "B", 
+            kHz ? frequency*1.0/1000 : frequency*1.0, 
+            kHz ? "kHz" : "Hz", 
+            wave, amplitude*1.0/10000, 
+            offset*1.0/10000, phase_offs*1.0/100);
 }
 
 void setCycles(char *channel, uint16_t cycles) 
@@ -92,8 +114,13 @@ void setCycles(char *channel, uint16_t cycles)
     int valueShift = isChannelA ? 0 : 16;
 
     *(base + OFS_CYCLES) &= ~(0xFFFF << valueShift);
-
     *(base + OFS_CYCLES) |= (cycles << valueShift);
+
+    channel = isChannelA ? "A" : "B";
+    if (cycles)
+        printf("Limiting channel %s to %d cycles", channel, cycles);
+    else
+        printf("Setting channel %s to run forever", channel);
 }
 
 void configureRun() 
