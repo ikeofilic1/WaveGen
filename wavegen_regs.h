@@ -18,15 +18,15 @@
 #ifndef WAVEGEN_REGS_H_
 #define WAVEGEN_REGS_H_
 
-#define OFS_MODE         0
-#define OFS_RUN          4
-#define OFS_FREQ_A       8
-#define OFS_FREQ_B      12
-#define OFS_OFFSET      16
-#define OFS_AMPLITUDE   20
-#define OFS_DTYCYC      24
-#define OFS_CYCLES      28
-#define OFS_PHASE_OFFS  32
+#define OFS_MODE        0
+#define OFS_RUN         1
+#define OFS_FREQ_A      2
+#define OFS_FREQ_B      3
+#define OFS_OFFSET      4
+#define OFS_AMPLITUDE   5
+#define OFS_DTYCYC      6
+#define OFS_CYCLES      7
+#define OFS_PHASE_OFFS  8
 
 // #define MODE_MASK        
 // #define RUN_MASK          4
