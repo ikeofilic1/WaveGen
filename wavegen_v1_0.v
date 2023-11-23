@@ -12,7 +12,7 @@
 		// Parameters of Axi Slave Bus Interface S00_AXI
 		parameter integer C_S00_AXI_DATA_WIDTH	= 32,
 		parameter integer C_S00_AXI_ADDR_WIDTH	= 6,
-		parameter integer SAMPLING_FREQUENCY = 500000000
+		parameter integer SAMPLING_FREQUENCY = 50000
 	)
 	(
 		// Users to add ports here

@@ -4,7 +4,7 @@ module wavegen_v1_0_S00_AXI #
 (
     // Bit width of S_AXI address bus
     parameter integer C_S_AXI_ADDR_WIDTH = 6,
-    parameter integer SAMPLING_FREQUENCY = 500000000
+    parameter integer SAMPLING_FREQUENCY = 50000
 )
 (
     // Ports to top level module (what makes this the Wavegen IP module)
@@ -48,7 +48,6 @@ module wavegen_v1_0_S00_AXI #
     output wire S_AXI_RVALID,
     input wire S_AXI_RREADY
 );
-
     // Internal registers
     reg [2:0] mode_a, mode_b;
     reg enable_a, enable_b; //used
@@ -62,15 +61,26 @@ module wavegen_v1_0_S00_AXI #
     
     wire signed [15:0] wave_a_value; //used
     wire signed [15:0] wave_b_value; //used
-   
-    assign OUT_A = enable_a ? wave_a_value*amp_a/(2**15) + offset_a : 16'd0;
-    assign OUT_B = enable_b ? wave_b_value*amp_b/(2**15) + offset_b : 16'd0;
     
+    wire signed [31:0] tempa = $signed(amp_a)*wave_a_value;
+    wire signed [31:0] tempb = $signed(amp_b)*wave_b_value;
+    
+    assign OUT_A = enable_a ? ((tempa >> 15) + offset_a) : 16'd0;
+    assign OUT_B = enable_b ? ((tempb >> 15) + offset_b) : 16'd0;
+    
+    vio_1 outputs (
+      .clk(LUT_CLK),              // input wire clk
+      .probe_in0(wave_a_value),  // input wire [2 : 0] probe_in0
+      .probe_in1(OUT_A),  // input wire [0 : 0] probe_in1
+      .probe_in2(wave_b_value),  // input wire [31 : 0] probe_in2
+      .probe_in3(OUT_B)
+    );
+   
     // Wave instantiations  
     WaveForms # (
         .SAMPLING_FREQUENCY(SAMPLING_FREQUENCY)
     ) A(
-        sample_clk, LUT_CLK, 1'b1, 
+        sample_clk, LUT_CLK, enable_a, enable_b,
         mode_a, mode_b, freq_a, freq_b, dtcyc_a, dtcyc_b, 
         phase_off_a, phase_off_b, cycles_a, cycles_b,
         wave_a_value, wave_b_value
@@ -362,9 +372,9 @@ module wavegen_v1_0_S00_AXI #
 		// Address decoding for reading registers
 		case (raddr[5:2])
 		    MODE_REG: 
-		        axi_rdata <= {mode_b, mode_a};
+		        axi_rdata <= {26'b0, mode_b, mode_a};
 		    RUN_REG:
-		        axi_rdata <= {enable_b, enable_a};
+		        axi_rdata <= {30'b0, enable_b, enable_a};
 		    FREQ_A_REG: 
 		        axi_rdata <= freq_a;
 		    FREQ_B_REG: 
@@ -374,7 +384,7 @@ module wavegen_v1_0_S00_AXI #
 		    AMPLTD_REG:
 			    axi_rdata <= {amp_b, amp_a};
 		    DTCYC_REG:
-			    axi_rdata <= {cycles_b, offset_a};
+			    axi_rdata <= {dtcyc_b, dtcyc_a};
 		    CYCLES_REG:
 		        axi_rdata <= {cycles_b, cycles_a};
 		    PHASE_OFF_REG:

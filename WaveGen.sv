@@ -69,9 +69,9 @@ module WaveGen(
     inout FIXED_IO_ps_srstb
 );
     // Terminate all of the unused outputs or i/o's
-    // assign LED = 10'b0000000000;
-    // assign RGB0 = 3'b000;
-    // assign RGB1 = 3'b000;
+     assign LED = 10'b0000000000;
+     assign RGB0 = 3'b000;
+     assign RGB1 = 3'b000;
     assign SS_ANODE = 4'b0000;
     assign SS_CATHODE = 8'b11111111;
     assign SERVO = 4'b0000;
@@ -95,12 +95,8 @@ module WaveGen(
     wire signed [15:0] OUT_A, OUT_B;
 
     wire [11:0] DACA_out, DACB_out;
-    assign LED = DACA_out[9:0];
-    assign RGB0 = {1'b0, DACA_out[10], 1'b0};
-    assign RGB1 = {1'b0, DACA_out[11], 1'b0};
-    
-     wire SDI, CS, LDAC, SCK;
-     assign GPIO = {4'b0, LDAC, SDI, SCK, CS, 16'b0};
+    wire SDI, CS, LDAC, SCK;
+    assign GPIO = {4'b0, LDAC, SDI, SCK, CS, 16'b0};
     
     // Instantiate DACs
     voltsToDACWords #(.DAC_TWOPOINTFIVE(157), .DAC_ZERO(2077)) DACA(OUT_A, DACA_out);
