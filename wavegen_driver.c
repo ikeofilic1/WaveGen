@@ -146,8 +146,209 @@ uint32_t getPhaseOffset()
 // Kernel Objects
 //-----------------------------------------------------------------------------
 
-static struct kobj_attribute swap0Attr = __ATTR(swap0, 0664, swap0Show, swap0Store);
+// Mode
+static uint32_t mode = 0;
+module_param(mode, int, S_IRUGO);
+MODULE_PARM_DESC(mode, "Waveform generator mode");
 
-// Position 0
-static int position0 = 0;
-module_param(position0, int, S_IRUGO);
+static ssize_t modeStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &mode);
+    if (result == 0)
+        setMode(mode);
+    return count;
+}
+
+static ssize_t modeShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    mode = getMode();
+    return sprintf(buffer, "%u\n", mode);
+}
+
+static struct kobj_attribute modeAttr = __ATTR(mode, 0664, modeShow, modeStore);
+
+// Frequency A
+static uint32_t freqA = 0;
+module_param(freqA, uint, S_IRUGO);
+MODULE_PARM_DESC(freqA, "Frequency A");
+
+static ssize_t freqAStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &freqA);
+    if (result == 0)
+        setFreqA(freqA);
+    return count;
+}
+
+static ssize_t freqAShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    freqA = getFreqA();
+    return sprintf(buffer, "%u\n", freqA);
+}
+
+static struct kobj_attribute freqAAttr = __ATTR(freqA, 0664, freqAShow, freqAStore);
+
+// Frequency B
+static uint32_t freqB = 0;
+module_param(freqB, uint, S_IRUGO);
+MODULE_PARM_DESC(freqB, "Frequency B setting");
+
+static ssize_t freqBStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &freqB);
+    if (result == 0)
+        setFreqB(freqB);
+    return count;
+}
+
+static ssize_t freqBShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    freqB = getFreqB();
+    return sprintf(buffer, "%u\n", freqB);
+}
+
+static struct kobj_attribute freqBAttr = __ATTR(freqB, 0664, freqBShow, freqBStore);
+
+// Amplitude
+static uint32_t amplitude = 0;
+module_param(amplitude, uint, S_IRUGO);
+MODULE_PARM_DESC(amplitude, "Amplitude setting");
+
+static ssize_t amplitudeStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &amplitude);
+    if (result == 0)
+        setAmplitude(amplitude);
+    return count;
+}
+
+static ssize_t amplitudeShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    amplitude = getAmplitude();
+    return sprintf(buffer, "%u\n", amplitude);
+}
+
+static struct kobj_attribute amplitudeAttr = __ATTR(amplitude, 0664, amplitudeShow, amplitudeStore);
+
+// Duty Cycle
+static uint32_t dutyCycle = 0;
+module_param(dutyCycle, uint, S_IRUGO);
+MODULE_PARM_DESC(dutyCycle, "Duty cycle setting");
+
+static ssize_t dutyCycleStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &dutyCycle);
+    if (result == 0)
+        setDutyCycle(dutyCycle);
+    return count;
+}
+
+static ssize_t dutyCycleShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    dutyCycle = getDutyCycle();
+    return sprintf(buffer, "%u\n", dutyCycle);
+}
+
+static struct kobj_attribute dutyCycleAttr = __ATTR(dutyCycle, 0664, dutyCycleShow, dutyCycleStore);
+
+// Cycle
+static uint32_t cycle = 0;
+module_param(cycle, uint, S_IRUGO);
+MODULE_PARM_DESC(cycle, "Cycle setting");
+
+static ssize_t cycleStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &cycle);
+    if (result == 0)
+        setCycle(cycle);
+    return count;
+}
+
+static ssize_t cycleShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    cycle = getCycle();
+    return sprintf(buffer, "%u\n", cycle);
+}
+
+static struct kobj_attribute cycleAttr = __ATTR(cycle, 0664, cycleShow, cycleStore);
+
+// Phase Offset
+static uint32_t phaseOffset = 0;
+module_param(phaseOffset, uint, S_IRUGO);
+MODULE_PARM_DESC(phaseOffset, "Phase offset setting");
+
+static ssize_t phaseOffsetStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &phaseOffset);
+    if (result == 0)
+        setPhaseOffset(phaseOffset);
+    return count;
+}
+
+static ssize_t phaseOffsetShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    phaseOffset = getPhaseOffset();
+    return sprintf(buffer, "%u\n", phaseOffset);
+}
+
+static struct kobj_attribute phaseOffsetAttr = __ATTR(phaseOffset, 0664, phaseOffsetShow, phaseOffsetStore);
+
+
+// Attributes
+static struct attribute *wavegenAttrs[] = {&modeAttr.attr, &freqAAttr.attr, &freqBAttr.attr, &amplitudeAttr.attr, &dutyCycleAttr.attr, &cycleAttr.attr, &phaseOffsetAttr.attr, NULL};
+
+static struct attribute_group wavegenGroup =
+{
+    .name = "wavegen",
+    .attrs = wavegenAttrs
+};
+
+static struct kobject *kobj;
+
+//-----------------------------------------------------------------------------
+// Initialization and Exit
+//-----------------------------------------------------------------------------
+
+static int __init initialize_module(void)
+{
+    int result;
+
+    printk(KERN_INFO "Wavegen driver: starting\n");
+
+    // Create Wavegen directory under /sys/kernel
+    kobj = kobject_create_and_add("Wavegen", NULL); //kernel_kobj);
+    if (!kobj)
+    {
+        printk(KERN_ALERT "Wavegen driver: failed to create and add kobj\n");
+        return -ENOENT;
+    }
+
+    // Create Wavegen groups
+    result = sysfs_create_group(kobj, &wavegenGroup);
+    if (result !=0)
+    {
+        printk(KERN_ALERT "Wavegen driver: failed to create sysfs group\n");
+        kobject_put(kobj);
+        return result;
+    }
+
+    // Physical to virtual memory map to access gpio registers
+    base = (unsigned int*)ioremap(AXI4_LITE_BASE + QE_BASE_OFFSET,
+                                          WAVEGEN_SPAN_IN_BYTES);
+    if (base == NULL)
+        return -ENODEV;
+
+    printk(KERN_INFO "Wavegen driver: initialized\n");
+
+    return 0;
+}
+
+static void __exit exit_module(void)
+{
+    kobject_put(kobj);
+    printk(KERN_INFO "Wavegen driver: exit\n");
+}
+
+module_init(initialize_module);
+module_exit(exit_module);
+
