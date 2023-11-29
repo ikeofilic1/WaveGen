@@ -28,8 +28,7 @@
                               // kobject_create_and_add, kobject_put
 #include <asm/io.h>           // iowrite, ioread, ioremap_nocache (platform specific)
 #include "../address_map.h"   // overall memory map
-#include "wavegen_regs.h"          // register offsets in QE IP
-#include "wavegen_ip.h" 
+#include "qe_regs.h"          // register offsets in QE IP
 
 //-----------------------------------------------------------------------------
 // Kernel module information
@@ -37,7 +36,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jason Losh");
-MODULE_DESCRIPTION("Wave Generator Driver");
+MODULE_DESCRIPTION("QE IP Driver");
 
 //-----------------------------------------------------------------------------
 // Global variables
@@ -49,92 +48,106 @@ static unsigned int *base = NULL;
 // Subroutines
 //-----------------------------------------------------------------------------
 
-void configureDC(char *channel, int16_t offset) 
+// Mode
+void setMode(uint8_t mode)
 {
-    int isChannelA = strcasecmp(channel, "a") == 0;
-    int modeShift = isChannelA ? 0 : 3;
-    int valueShift = isChannelA ? 0 : 16;
-
-    //clear previous settings
-    iowrite32(ioread32(base + OFS_MODE) & ~(0x7 << modeShift), base + OFS_MODE);
-    iowrite32(ioread32(base + OFS_OFFSET) & ~(0xFFFF << valueShift), base + OFS_OFFSET);
-
-    //set new configuration
-    iowrite32(ioread32(base + OFS_MODE) | (MODE_DC << modeShift), base + OFS_MODE);
-    iowrite32(ioread32(base + OFS_OFFSET) | ((uint16_t)offset << valueShift), base + OFS_OFFSET);
+    iowrite32(mode, base + OFS_MODE);
 }
 
-void configureWaveform(char *channel, int mode, uint32_t frequency, uint16_t amplitude, int16_t offset, uint16_t dutyCycle, int16_t phase_offs) 
+int32_t getMode()
 {
-    int isChannelA = strcasecmp(channel, "a") == 0;
-    int OFS_FREQ = isChannelA ? OFS_FREQ_A : OFS_FREQ_B;
-    int modeShift = isChannelA ? 0 : 3;
-    int valueShift = isChannelA ? 0 : 16;
-
-    //clear previous settings
-    iowrite32(ioread32(base + OFS_MODE) & ~(0x7 << modeShift), base + OFS_MODE);
-    iowrite32(0, base + OFS_FREQ);
-    iowrite32(ioread32(base + OFS_OFFSET) & ~(0xFFFF << valueShift), base + OFS_OFFSET);
-    iowrite32(ioread32(base + OFS_AMPLITUDE) & ~(0xFFFF << valueShift), base + OFS_AMPLITUDE);
-    iowrite32(ioread32(base + OFS_DTYCYC) & ~(0xFFFF << valueShift), base + OFS_DTYCYC);
-    iowrite32(ioread32(base + OFS_PHASE_OFFS) & ~(0xFFFF << valueShift), base + OFS_PHASE_OFFS);
-
-    //set new configuration
-    iowrite32(ioread32(base + OFS_MODE) | (mode << modeShift), base + OFS_MODE);
-    iowrite32(frequency, base + OFS_FREQ);
-    iowrite32(ioread32(base + OFS_OFFSET) | ((uint16_t)offset << valueShift), base + OFS_OFFSET);
-    iowrite32(ioread32(base + OFS_AMPLITUDE) | (amplitude << valueShift), base + OFS_AMPLITUDE);
-    iowrite32(ioread32(base + OFS_DTYCYC) | (dutyCycle << valueShift), base + OFS_DTYCYC);
-    iowrite32(ioread32(base + OFS_PHASE_OFFS) | ((uint16_t)phase_offs << valueShift), base + OFS_PHASE_OFFS);
+    return ioread32(base + OFS_MODE);
 }
 
+// Run
 
-void setCycles(char *channel, uint16_t cycles) 
+// Freq A
+void setfreqA(unsigned int freqA)
 {
-    int isChannelA = strcasecmp(channel, "a") == 0;
-    int valueShift = isChannelA ? 0 : 16;
-
-    iowrite32(ioread32(base + OFS_CYCLES) & ~(0xFFFF << valueShift), base + OFS_CYCLES);
-    iowrite32(ioread32(base + OFS_CYCLES) | (cycles << valueShift), base + OFS_CYCLES);
+    iowrite32(freqA, base + OFS_FREQ_A);
 }
 
-
-void configureRun() 
+int32_t getfreqA(uint8_t freqA)
 {
-    iowrite32(RUN_A | RUN_B, base + OFS_RUN);
+    return ioread32(base + (OFS_FREQ_A + (freqA * 2)));
 }
 
-void configureStop() 
+// Freq B
+void setfreqB(unsigned int freqB)
 {
-    iowrite32(~(RUN_A | RUN_B), base + OF
+    iowrite32(freqB, base + OFS_FREQ_B);
 }
+
+int32_t getfreqB(uint8_t freqB)
+{
+    return ioread32(base + (OFS_FREQ_B + (freqB * 2)));
+}
+
+// Offset
+void setOffset(unsigned int offset)
+{
+    iowrite32(offset, base + OFS_PERIOD);
+}
+
+int32_t getOffset(uint8_t offset)
+{
+    return ioread32(base + (OFS_OFFSET + (offset * 2)));
+}
+
+// Amplitude
+void setAmplitude(uint32_t amplitude)
+{
+    iowrite32(amplitude, base + OFS_AMPLITUDE);
+}
+
+uint32_t getAmplitude()
+{
+    return ioread32(base + OFS_AMPLITUDE);
+}
+
+// Duty Cycle
+void setDutyCycle(uint32_t dutyCycle)
+{
+    iowrite32(dutyCycle, base + OFS_DTYCYC);
+}
+
+uint32_t getDutyCycle()
+{
+    return ioread32(base + OFS_DTYCYC);
+}
+
+// Cycles
+void setCycle(uint32_t cycle)
+{
+    iowrite32(cycle, base + OFS_CYCLES);
+}
+
+uint32_t getCycle()
+{
+    return ioread32(base + OFS_CYCLES);
+}
+
+// PHASE OFFS
+void setPhaseOffset(uint32_t phaseOffset)
+{
+    iowrite32(phaseOffset, base + OFS_PHASE_OFFS);
+}
+
+uint32_t getPhaseOffset()
+{
+    return ioread32(base + OFS_PHASE_OFFS);
+}
+
+//-----------------------------------------------------------------------------
+// Need to fix this - 
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Kernel Objects
 //-----------------------------------------------------------------------------
 
-// Enable 0
-static bool channelA = 0;
-module_param(channelA, bool, S_IRUGO);
-MODULE_PARM_DESC(channelA, " Enable wavegen channel A");
+static struct kobj_attribute swap0Attr = __ATTR(swap0, 0664, swap0Show, swap0Store);
 
-static ssize_t enablechannelA_Store(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
-{
-    if (strncmp(buffer, "true", strlen("true")) == 0) 
-    {
-        configureRun(); 
-        channelA = true;
-    } 
-    else 
-        if (strncmp(buffer, "false", strlen("false")) == 0) 
-        {
-            configureStop(); 
-            channelA = false;
-        }
-    return count;
-}
-
-static ssize_t enablechannelA_Show(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
-{
-    return sprintf(buffer, "%s\n", channelA ? "true" : "false");
-}
+// Position 0
+static int position0 = 0;
+module_param(position0, int, S_IRUGO);
