@@ -85,12 +85,12 @@ module WaveGen(
     assign IMU_DEN_AG = 1'b0;
     
     // For A:
-    // 2.5V = 157 in dac words
+    // 2.5V = 135 in dac words
     // 0V = 2077 
     
     // For B:
     // 2.5V = 146 in dac words
-    // 0V = 2073
+    // 0V = 2071
     
     wire signed [15:0] OUT_A, OUT_B;
 
@@ -99,8 +99,13 @@ module WaveGen(
     assign GPIO = {4'b0, LDAC, SDI, SCK, CS, 16'b0};
     
     // Instantiate DACs
-    voltsToDACWords #(.DAC_TWOPOINTFIVE(157), .DAC_ZERO(2077)) DACA(OUT_A, DACA_out);
-    voltsToDACWords #(.DAC_TWOPOINTFIVE(146), .DAC_ZERO(2073)) DACB(OUT_B, DACB_out);
+    // Ik's config
+    voltsToDACWords #(.DAC_TWOPOINTFIVE(135), .DAC_ZERO(2079)) DACA(OUT_A, DACA_out);
+    voltsToDACWords #(.DAC_TWOPOINTFIVE(134), .DAC_ZERO(2071)) DACB(OUT_B, DACB_out);
+    
+    // Athiya's config
+//    voltsToDACWords #(.DAC_TWOPOINTFIVE(34), .DAC_ZERO(2086)) DACA(OUT_A, DACA_out);
+//    voltsToDACWords #(.DAC_TWOPOINTFIVE(100), .DAC_ZERO(2069)) DACB(OUT_B, DACB_out);
     
     DAC_Controller controller(DACA_out, DACB_out, CLK100, CS, SCK, SDI, LDAC);  
     
