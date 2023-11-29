@@ -33,7 +33,7 @@ module voltsToDACWords
     parameter N = 16, M = 12
 )(
     input signed [N-1:0] in,
-    output signed [M-1:0] calibrated
+    output [M-1:0] calibrated
 );    
     assign calibrated = ($signed(DAC_TWOPOINTFIVE - DAC_ZERO)*in + 12500)/25000 + DAC_ZERO;
 endmodule
