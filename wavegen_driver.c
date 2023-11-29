@@ -28,7 +28,7 @@
                               // kobject_create_and_add, kobject_put
 #include <asm/io.h>           // iowrite, ioread, ioremap_nocache (platform specific)
 #include "../address_map.h"   // overall memory map
-#include "qe_regs.h"          // register offsets in QE IP
+#include "wavegen_regs.h"     // register offsets in QE IP
 
 //-----------------------------------------------------------------------------
 // Kernel module information
@@ -36,7 +36,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jason Losh");
-MODULE_DESCRIPTION("QE IP Driver");
+MODULE_DESCRIPTION("Wavegen IP Driver");
 
 //-----------------------------------------------------------------------------
 // Global variables
@@ -137,10 +137,6 @@ uint32_t getPhaseOffset()
 {
     return ioread32(base + OFS_PHASE_OFFS);
 }
-
-//-----------------------------------------------------------------------------
-// Need to fix this - 
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Kernel Objects
