@@ -29,7 +29,7 @@
 #define OFS_PHASE_OFFS  8
 
 
-#define MODE_MASK       0x7
+#define MMODE_MASK       0x7
 #define RUN_MASK        0x1
 #define RUN_A          (RUN_MASK << 0)
 #define RUN_B          (RUN_MASK << 1)
