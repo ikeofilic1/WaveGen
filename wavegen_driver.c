@@ -96,16 +96,140 @@ int32_t getfreqB(void)
     return ioread32(base + OFS_FREQ_B);
 }
 
-// Offset
-void setOffset(uint8_t channel, uint16_t offset)
+// Offset A
+void setOffsetA(uint16_t offsetA)
 {
-    iowrite32(offset, base + OFS_PERIOD);
+    iowrite32(offsetA, base + OFS_OFFSET);
 }
 
-int32_t getOffset(uint8_t channel)
+uint32_t getOffsetA(void)
 {
     return ioread32(base + OFS_OFFSET);
 }
+
+// Offset B
+void setOffsetB(uint16_t offsetB)
+{
+    iowrite32(offsetB, base + OFS_OFFSET);
+}
+
+uint32_t getOffsetB(void)
+{
+    return ioread32(base + OFS_OFFSET);
+}
+
+// Amplitude A
+void setAmplitudeA(uint32_t amplitudeA)
+{
+    iowrite32(amplitudeA, base + OFS_AMPLITUDE);
+}
+
+uint32_t getAmplitudeA(void)
+{
+    return ioread32(base + OFS_AMPLITUDE);
+}
+
+// Amplitude B
+void setAmplitudeB(uint32_t amplitudeB)
+{
+    iowrite32(amplitudeB, base + OFS_AMPLITUDE);
+}
+
+uint32_t getAmplitudeB(void)
+{
+    return ioread32(base + OFS_AMPLITUDE);
+}
+
+// Duty Cycle A
+void setDutyCycleA(uint32_t dutyCycleA)
+{
+    iowrite32(dutyCycleA, base + OFS_DUTYCYCLE_A);
+}
+
+uint32_t getDutyCycleA(void)
+{
+    return ioread32(base + OFS_DUTYCYCLE_A);
+}
+
+// Duty Cycle B
+void setDutyCycleB(uint32_t dutyCycleB)
+{
+    iowrite32(dutyCycleB, base + OFS_DUTYCYCLE);
+}
+
+uint32_t getDutyCycleB(void)
+{
+    return ioread32(base + OFS_DUTYCYCLE);
+}
+
+// Cycle A
+void setCycleA(uint32_t cycleA)
+{
+    iowrite32(cycleA, base + OFS_CYCLE_A);
+}
+
+uint32_t getCycleA(void)
+{
+    return ioread32(base + OFS_CYCLE_A);
+}
+
+// Cycle B
+void setCycleB(uint32_t cycleB)
+{
+    iowrite32(cycleB, base + OFS_CYCLE);
+}
+
+uint32_t getCycleB(void)
+{
+    return ioread32(base + OFS_CYCLE);
+}
+
+// Phase Offset A
+void setPhaseOffsetA(uint32_t phaseOffsetA)
+{
+    iowrite32(phaseOffsetA, base + OFS_PHASEOFFSET_A);
+}
+
+uint32_t getPhaseOffsetA(void)
+{
+    return ioread32(base + OFS_PHASEOFFSET_A);
+}
+
+// Phase Offset B
+void setPhaseOffsetB(uint32_t phaseOffsetB)
+{
+    iowrite32(phaseOffsetB, base + OFS_PHASEOFFSET);
+}
+
+uint32_t getPhaseOffsetB(void)
+{
+    return ioread32(base + OFS_PHASEOFFSET);
+}
+
+//-----------------------------------------------------------------------------
+// Kernel Objects
+//-----------------------------------------------------------------------------
+
+// Mode
+static uint8_t modeA = 0;
+module_param(modeA, uint8_t, S_IRUGO);
+MODULE_PARM_DESC(modeA, "Channel A mode");
+
+static ssize_t modeAStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &modeA);
+    if (result == 0)
+        setMode(1, modeA);
+    return count;
+}
+
+static ssize_t modeAShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    modeA = getMode(0);
+    return sprintf(buffer, "%u\n", modeA);
+}
+
+static struct kobj_attribute modeBAttr = __ATTR(modeB, 0664, modeBShow, modeBStore);
 
 // Amplitude
 static uint32_t amplitudeA = 0;
@@ -196,7 +320,7 @@ static uint8_t modeB = 0;
 module_param(modeB, uint8_t, S_IRUGO);
 MODULE_PARM_DESC(modeB, "Channel B mode");
 
-static ssize_t modeAStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+static ssize_t modeBStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
 {
     int result = kstrtouint(buffer, 0, &modeB);
     if (result == 0)
@@ -204,7 +328,7 @@ static ssize_t modeAStore(struct kobject *kobj, struct kobj_attribute *attr, con
     return count;
 }
 
-static ssize_t modeAShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+static ssize_t modeBShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
 {
     modeB = getMode(1);
     return sprintf(buffer, "%u\n", modeB);
