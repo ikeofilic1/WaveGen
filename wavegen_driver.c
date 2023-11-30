@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Jason Losh");
+MODULE_AUTHOR("Girl and Boy together forever");
 MODULE_DESCRIPTION("Wavegen IP Driver");
 
 //-----------------------------------------------------------------------------
@@ -49,14 +49,17 @@ static unsigned uint32_t *base = NULL;
 //-----------------------------------------------------------------------------
 
 // Mode
-void setMode(uint8_t mode)
+void setMode(uint8_t channel, uint8_t mode)
 {
-    iowrite32(mode, base + OFS_MODE);
+    uint32_t val = ioread32(base + OFS_MODE) & ~(MODE_MASK << channel*3);
+    val |= (mode << channel*3);
+
+    iowrite32(val, base + OFS_MODE);
 }
 
 int32_t getMode(uint8_t channel)
 {
-    return ioread32(base + OFS_MODE);
+    return (ioread32(base + OFS_MODE) >> channel*3) ;
 }
 
 // Run
@@ -75,7 +78,7 @@ bool isChannelRunning(uint8_t channel)
 }
 
 // Freq A
-void setfreqA(void)
+void setfreqA(uint32_t freqA)
 {
     iowrite32(freqA, base + OFS_FREQ_A);
 }
@@ -86,7 +89,7 @@ int32_t getfreqA(void)
 }
 
 // Freq B
-void setfreqB(void)
+void setfreqB(uint32_t freqB)
 {
     iowrite32(freqB, base + OFS_FREQ_B);
 }
@@ -99,116 +102,155 @@ int32_t getfreqB(void)
 // Offset A
 void setOffsetA(uint16_t offsetA)
 {
-    iowrite32(offsetA, base + OFS_OFFSET);
+    int shift = channel ? 16 : 0;
+
+    uint32_t val = ioread32(base + OFS_OFFSET) & ~(OFFSET_MASK << shift);
+    val |= (offsetA << shift);
+    iowrite32(val, base + OFS_OFFSET);
 }
 
-uint32_t getOffsetA(void)
+uint32_t getOffsetA(uint8_t channel)
 {
-    return ioread32(base + OFS_OFFSET);
+    return ioread32(base + OFS_OFFSET) >> channel*16;
 }
 
 // Offset B
 void setOffsetB(uint16_t offsetB)
 {
-    iowrite32(offsetB, base + OFS_OFFSET);
+    int shift = channel ? 16 : 0;
+
+    uint32_t val = ioread32(base + OFS_OFFSET) & ~(OFFSET_MASK << shift);
+    val |= (offsetB << shift);
+    iowrite32(val, base + OFS_OFFSET);
 }
 
 uint32_t getOffsetB(void)
 {
-    return ioread32(base + OFS_OFFSET);
+    return ioread32(base + OFS_OFFSET) >> channel*16;
 }
 
 // Amplitude A
-void setAmplitudeA(uint32_t amplitudeA)
+void setAmplitudeA(uint8_t channel, uint32_t amplitude)
 {
-    iowrite32(amplitudeA, base + OFS_AMPLITUDE);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_AMPLITUDE) & ~(AMPLITUDE_MASK << shift);
+    val |= (amplitude << shift);
+    iowrite32(val, base + OFS_AMPLITUDE);
 }
 
-uint32_t getAmplitudeA(void)
+uint32_t getAmplitudeA(uint8_t channel)
 {
-    return ioread32(base + OFS_AMPLITUDE);
+    return ioread32(base + OFS_AMPLITUDE) >> channel*16 ;
 }
 
 // Amplitude B
-void setAmplitudeB(uint32_t amplitudeB)
+void setAmplitudeB(uint8_t channel, uint32_t amplitude)
 {
-    iowrite32(amplitudeB, base + OFS_AMPLITUDE);
+    int shift = channel ? 16 : 0;
+     uint32_t val = ioread32(base + OFS_AMPLITUDE) & ~(AMPLITUDE_MASK << shift);
+    val |= (amplitude << shift);
+    iowrite32(val, base + OFS_AMPLITUDE);
 }
 
-uint32_t getAmplitudeB(void)
+uint32_t getAmplitudeB(uint8_t channel)
 {
-    return ioread32(base + OFS_AMPLITUDE);
+    return ioread32(base + OFS_AMPLITUDE) >> channel*16;
 }
 
 // Duty Cycle A
-void setDutyCycleA(uint32_t dutyCycleA)
+void setDutyCycleA(uint8_t channel, uint32_t dutyCycle)
 {
-    iowrite32(dutyCycleA, base + OFS_DUTYCYCLE_A);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_DTYCYC) & ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+    iowrite32(val, base + OFS_DTYCYC);
 }
 
-uint32_t getDutyCycleA(void)
+uint32_t getDutyCycleA(uint8_t channel)
 {
-    return ioread32(base + OFS_DUTYCYCLE_A);
+    return ioread32(base + OFS_DTYCYC) >> channel*16;
 }
 
 // Duty Cycle B
-void setDutyCycleB(uint32_t dutyCycleB)
+void setDutyCycleB(uint8_t channel, uint32_t dutyCycle)
 {
-    iowrite32(dutyCycleB, base + OFS_DUTYCYCLE);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_DTYCYC) ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+    iowrite32(val, base + OFS_DTYCYC);
 }
 
-uint32_t getDutyCycleB(void)
+uint32_t getDutyCycleB(uint8_t channel)
 {
-    return ioread32(base + OFS_DUTYCYCLE);
+    return ioread32(base + OFS_DTYCYC) >> channel*16;
 }
 
 // Cycle A
-void setCycleA(uint32_t cycleA)
+void setCycleA(uint8_t channel, uint32_t cycle)
 {
-    iowrite32(cycleA, base + OFS_CYCLE_A);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_CYCLES) & ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+    iowrite32(val, base + OFS_CYCLES);
 }
 
-uint32_t getCycleA(void)
+uint32_t getCycleA(uint8_t channel)
 {
-    return ioread32(base + OFS_CYCLE_A);
+    return ioread32(base + OFS_CYCLES) >> channel*16;
 }
 
 // Cycle B
-void setCycleB(uint32_t cycleB)
+void setCycleB(uint8_t channel, uint32_t cycle)
 {
-    iowrite32(cycleB, base + OFS_CYCLE);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_CYCLES) & ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+    iowrite32(val, base + OFS_CYCLES);
 }
 
-uint32_t getCycleB(void)
+uint32_t getCycleB(uint8_t channel)
 {
-    return ioread32(base + OFS_CYCLE);
+    return ioread32(base + OFS_CYCLES) >> channel*16;
 }
 
 // Phase Offset A
-void setPhaseOffsetA(uint32_t phaseOffsetA)
+void setPhaseOffsetA(uint8_t channel, uint32_t phaseOffset)
 {
-    iowrite32(phaseOffsetA, base + OFS_PHASEOFFSET_A);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_PHASE_OFFS) & ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+
+    iowrite32(val, base + OFS_PHASE_OFFS);
 }
 
-uint32_t getPhaseOffsetA(void)
+uint32_t getPhaseOffsetA(uint8_t channel)
 {
-    return ioread32(base + OFS_PHASEOFFSET_A);
+    return ioread32(base + OFS_PHASE_OFFS) >> channel*16;
 }
 
 // Phase Offset B
-void setPhaseOffsetB(uint32_t phaseOffsetB)
+void setPhaseOffsetB(uint8_t channel, uint32_t phaseOffset)
 {
-    iowrite32(phaseOffsetB, base + OFS_PHASEOFFSET);
+    int shift = channel ? 16 : 0;
+    uint32_t val = ioread32(base + OFS_PHASE_OFFS) & ~(DTYCYC_MASK << shift);
+    val |= (dutyCycle << shift);
+    iowrite32(val, base + OFS_PHASE_OFFS);
 }
 
-uint32_t getPhaseOffsetB(void)
+uint32_t getPhaseOffsetB(uint8_t channel)
 {
-    return ioread32(base + OFS_PHASEOFFSET);
+    return ioread32(base + OFS_PHASE_OFFS) >> channel*16;
 }
 
 //-----------------------------------------------------------------------------
 // Kernel Objects
 //-----------------------------------------------------------------------------
+
+const char *mode_map[] = {
+    [MODE_DC] = "dc",
+    [MODE_SINE] = "sine",
+    [MODE_SAWTOOTH] = ""
+};
 
 // Mode
 static uint8_t modeA = 0;
@@ -219,17 +261,38 @@ static ssize_t modeAStore(struct kobject *kobj, struct kobj_attribute *attr, con
 {
     int result = kstrtouint(buffer, 0, &modeA);
     if (result == 0)
-        setMode(1, modeA);
+        setMode(0, modeA);
     return count;
 }
 
 static ssize_t modeAShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
 {
     modeA = getMode(0);
-    return sprintf(buffer, "%u\n", modeA);
+    return strcpy(buffer, "%u\n", modeA);
 }
 
 static struct kobj_attribute modeBAttr = __ATTR(modeB, 0664, modeBShow, modeBStore);
+
+// Frequency A
+static uint32_t freqA = 0;
+module_param(freqA, uint, S_IRUGO);
+MODULE_PARM_DESC(freqA, "Frequency A");
+
+static ssize_t freqAStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &freqA);
+    if (result == 0)
+        setFreqA(freqA);
+    return count;
+}
+
+static ssize_t freqAShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    freqA = getFreqA();
+    return sprintf(buffer, "%u\n", freqA);
+}
+
+static struct kobj_attribute freqAAttr = __ATTR(freqA, 0664, freqAShow, freqAStore);
 
 // Amplitude
 static uint32_t amplitudeA = 0;
@@ -335,6 +398,27 @@ static ssize_t modeBShow(struct kobject *kobj, struct kobj_attribute *attr, char
 }
 
 static struct kobj_attribute modeBAttr = __ATTR(modeB, 0664, modeBShow, modeBStore);
+
+// Frequency B
+static uint32_t freqB = 0;
+module_param(freqB, uint, S_IRUGO);
+MODULE_PARM_DESC(freqB, "Frequency B setting");
+
+static ssize_t freqBStore(struct kobject *kobj, struct kobj_attribute *attr, const char *buffer, size_t count)
+{
+    int result = kstrtouint(buffer, 0, &freqB);
+    if (result == 0)
+        setFreqB(freqB);
+    return count;
+}
+
+static ssize_t freqBShow(struct kobject *kobj, struct kobj_attribute *attr, char *buffer)
+{
+    freqB = getFreqB();
+    return sprintf(buffer, "%u\n", freqB);
+}
+
+static struct kobj_attribute freqBAttr = __ATTR(freqB, 0664, freqBShow, freqBStore);
 
 // Amplitude
 static uint32_t amplitudeB = 0;
